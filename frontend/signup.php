@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join Group 1 - Tour Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -79,11 +80,6 @@
             box-sizing: border-box;
         }
 
-        .form-group textarea {
-            resize: vertical;
-            height: 80px;
-        }
-
         .btn-signup {
             width: 100%;
             padding: 12px;
@@ -100,6 +96,11 @@
 
         .btn-signup:hover {
             background-color: #27ae60;
+        }
+
+        .btn-signup:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
         }
 
         .footer-text {
@@ -157,10 +158,10 @@
 
             <div class="form-group">
                 <label>Professional Bio / Details</label>
-                <textarea id="bio" name="bio" placeholder="Tell us about your experience or travel interests..."></textarea>
+                <textarea id="bio" name="bio" style="width:100%; height:80px; resize:vertical;" placeholder="Tell us about your experience or travel interests..."></textarea>
             </div>
 
-            <button type="submit" class="btn-signup">REGISTER NOW</button>
+            <button type="submit" id="signupBtn" class="btn-signup">REGISTER NOW</button>
 
             <div class="footer-text">
                 Already have an account? <a href="login.php">Login here</a>
@@ -172,6 +173,7 @@
         document.getElementById('signupForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            const signupBtn = document.getElementById('signupBtn');
             const fullname = document.getElementById('fullname').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -179,10 +181,20 @@
             const role = document.getElementById('role').value;
             const bio = document.getElementById('bio').value;
 
+            // Password Validation
             if (password !== confirm_password) {
-                alert("Passwords do not match!");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Passwords do not match!',
+                    confirmButtonColor: '#3498db'
+                });
                 return;
             }
+
+            // Show loading
+            signupBtn.disabled = true;
+            signupBtn.innerText = "Creating Account...";
 
             const formData = {
                 fullname: fullname,
@@ -192,7 +204,6 @@
                 bio: bio
             };
 
-            // Using ../ to go up from frontend/ and into backend/
             fetch('../backend/auth_signup.php', {
                 method: 'POST',
                 headers: {
@@ -202,21 +213,42 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
+                    throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
                 if (data.status === 'success') {
-                    alert("Success: " + data.message);
-                    window.location.href = 'login.php'; 
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registration Successful!',
+                        text: data.message,
+                        confirmButtonColor: '#2ecc71',
+                        confirmButtonText: 'Login Now'
+                    }).then((result) => {
+                        window.location.href = 'login.php'; 
+                    });
                 } else {
-                    alert("Registration Failed: " + data.message);
+                    signupBtn.disabled = false;
+                    signupBtn.innerText = "REGISTER NOW";
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Registration Failed',
+                        text: data.message,
+                        confirmButtonColor: '#e74c3c'
+                    });
                 }
             })
             .catch(error => {
+                signupBtn.disabled = false;
+                signupBtn.innerText = "REGISTER NOW";
                 console.error('Error:', error);
-                alert("Error connecting to server. Please check your file paths and XAMPP status.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Connection Error',
+                    text: 'Error connecting to server. Please check your XAMPP status.',
+                    confirmButtonColor: '#e74c3c'
+                });
             });
         });
     </script>

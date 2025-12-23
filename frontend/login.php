@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group 1 - Tour Management Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -92,10 +93,18 @@
             font-weight: bold;
             cursor: pointer;
             transition: background 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .btn-login:hover {
             background-color: #2980b9;
+        }
+
+        .btn-login:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
         }
 
         .extra-links {
@@ -148,7 +157,7 @@
                 <input type="password" id="password" name="password" placeholder="••••••••" required>
             </div>
 
-            <button type="submit" class="btn-login">SIGN IN</button>
+            <button type="submit" id="submitBtn" class="btn-login">SIGN IN</button>
 
             <div class="extra-links">
                 <a href="signup.php">Create Account</a>
@@ -160,10 +169,14 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            const submitBtn = document.getElementById('submitBtn');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // We only send credentials. The server tells us the role.
+            // Visual feedback: Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Authenticating...";
+
             const loginData = {
                 email: email,
                 password: password
@@ -184,24 +197,53 @@
             })
             .then(data => {
                 if (data.status === 'success') {
-                    // Success! data.user.role contains the role from the DB
-                    // Automatic Routing based on Database Role
-                    if (data.user.role === 'guide') {
-                        window.location.href = 'add_tour.php'; 
-                    } else if (data.user.role === 'tourist') {
-                        window.location.href = 'tourist_home.php'; 
-                    } else if (data.user.role === 'admin') {
-                        window.location.href = 'manage_users.php';
-                    } else {
-                        alert("Role not recognized. Contact support.");
-                    }
+                    // Success Toast
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Signed in successfully'
+                    }).then(() => {
+                        // Routing
+                        if (data.user.role === 'guide') {
+                            window.location.href = 'add_tour.php'; 
+                        } else if (data.user.role === 'tourist') {
+                            window.location.href = 'tourist_home.php'; 
+                        } else if (data.user.role === 'admin') {
+                            window.location.href = 'manage_users.php';
+                        } else {
+                            Swal.fire('Error', 'Role not recognized. Contact support.', 'error');
+                        }
+                    });
+
                 } else {
-                    alert("Login Failed: " + data.message);
+                    // Reset button and show error
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "SIGN IN";
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Failed',
+                        text: data.message,
+                        confirmButtonColor: '#3498db'
+                    });
                 }
             })
             .catch(error => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "SIGN IN";
                 console.error('Error:', error);
-                alert("Could not reach backend. Verify XAMPP is active.");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Connection Error',
+                    text: 'Could not reach backend. Verify XAMPP is active.',
+                    confirmButtonColor: '#3498db'
+                });
             });
         });
     </script>
