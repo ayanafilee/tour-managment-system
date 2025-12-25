@@ -2,7 +2,7 @@
 session_start();
 // Security: Only allow 'admin' role
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header("Location: ../login.php");
+    header("Location: ./login.php");
     exit();
 }
 ?>

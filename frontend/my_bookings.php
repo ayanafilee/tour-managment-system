@@ -2,7 +2,7 @@
 session_start();
 // Security: Only allow tourists to see their own bookings
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'tourist') {
-    header("Location: ../login.php");
+    header("Location: ./login.php");
     exit();
 }
 ?>

@@ -2,7 +2,7 @@
 session_start();
 // Security Check: Only allow logged-in Guides
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'guide') {
-    header("Location: ../login.php"); // Ensure path back to login is correct
+    header("Location: ./login.php"); // Ensure path back to login is correct
     exit();
 }
 ?>

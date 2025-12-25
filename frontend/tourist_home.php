@@ -2,7 +2,7 @@
 session_start();
 // Redirect to login if not logged in or not a tourist
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'tourist') {
-    header("Location: ../login.php");
+    header("Location: ./login.php");
     exit();
 }
 ?>
